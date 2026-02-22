@@ -5,7 +5,7 @@ import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Slider } from './ui/Slider';
 import { Label } from './ui/Label';
-import { Download, Copy, CheckCircle2, Bookmark } from 'lucide-react';
+import { Download, Copy, CheckCircle2, Bookmark, QrCode } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../utils/cn';
 
@@ -30,6 +30,18 @@ export const QRPreview: React.FC<QRPreviewProps> = ({ state, updateState, saveCu
     };
 
     const validData = isValidUrl(state.data) ? state.data : 'https://example.com';
+
+    const optionsKey = JSON.stringify({
+        width: state.size,
+        margin: state.margin,
+        errorCorrectionLevel: state.errorCorrectionLevel,
+        dotsOptions: state.dotsOptions,
+        backgroundOptions: state.backgroundOptions,
+        cornersSquareOptions: state.cornersSquareOptions,
+        cornersDotOptions: state.cornersDotOptions,
+        showLogo: state.showLogo,
+        data: validData
+    });
 
     useEffect(() => {
         const currentOptions = {
@@ -56,7 +68,7 @@ export const QRPreview: React.FC<QRPreviewProps> = ({ state, updateState, saveCu
         } else {
             qrCode.current.update(currentOptions);
         }
-    }, [state, validData]);
+    }, [optionsKey]);
 
     const onDownloadClick = () => {
         if (!isValidUrl(state.data)) return;
@@ -91,28 +103,47 @@ export const QRPreview: React.FC<QRPreviewProps> = ({ state, updateState, saveCu
         setTimeout(() => setSaved(false), 2000);
     };
 
-    const isUrlValid = isValidUrl(state.data);
+    // In QRPreview, state.data is actually the `generatedData` passed from App.tsx
+    // The live form data never reaches here until 'Generate QR' is clicked.
+    // So we just check if it's a valid URL or empty.
+    const isUrlValid = isValidUrl(state.data) && state.data.length > 0;
+
+    // We want to show the QR code if we have a valid generated URL
+    const showQR = isUrlValid;
 
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-md mx-auto sticky top-8">
-            <Card className="p-8 w-full flex flex-col items-center gap-8 relative overflow-hidden">
+            <Card className="p-8 w-full flex flex-col items-center gap-6 relative overflow-hidden min-h-[400px]">
                 {!isUrlValid && state.data.length > 0 && (
                     <div className="absolute top-0 left-0 right-0 bg-red-50 text-red-600 text-[11px] font-medium py-1.5 px-4 text-center border-b border-red-100 z-10">
-                        Please enter a valid URL (e.g., https://example.com)
+                        Invalid generated URL (e.g., https://example.com)
                     </div>
                 )}
-                <div className="relative group w-full flex justify-center mt-2">
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                        className={cn(
-                            "rounded-2xl overflow-hidden shadow-sm border flex items-center justify-center bg-white transition-all duration-300",
-                            isUrlValid || state.data.length === 0 ? "border-beige-200/50" : "border-red-200 opacity-50 blur-[2px]"
-                        )}
-                    >
-                        <div ref={ref} />
-                    </motion.div>
+
+                <div className="flex flex-col items-center gap-4 w-full mt-2">
+                    <div className="relative group flex justify-center w-full">
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            className={cn(
+                                "rounded-2xl overflow-hidden flex items-center justify-center transition-all duration-300 relative",
+                                showQR ? "shadow-sm border border-beige-200/50 bg-white" : "w-[300px] h-[300px] border-2 border-dashed border-beige-300 bg-beige-50/50"
+                            )}
+                        >
+                            <div ref={ref} className={showQR ? "block" : "hidden"} />
+                            {!showQR && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-olive-400 gap-3">
+                                    <QrCode className="w-10 h-10 opacity-40" />
+                                    <span className="text-sm font-medium">No QR Code Generated</span>
+                                </div>
+                            )}
+                        </motion.div>
+                    </div>
+                    {/* Live Title Display */}
+                    <h3 className="text-lg font-semibold text-olive-900 text-center w-full truncate px-4">
+                        {state.title || "Sraman SneakyQR"}
+                    </h3>
                 </div>
 
                 {/* Size Controls under QR code */}
@@ -132,16 +163,16 @@ export const QRPreview: React.FC<QRPreviewProps> = ({ state, updateState, saveCu
 
                 {/* Primary Actions */}
                 <div className="flex flex-col gap-3 w-full border-t border-beige-200 pt-6">
-                    <Button onClick={handleSave} variant="primary" className="w-full">
+                    <Button onClick={handleSave} variant="primary" className="w-full" disabled={!isUrlValid}>
                         {saved ? <CheckCircle2 className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
                         {saved ? 'Saved!' : 'Save Code'}
                     </Button>
                     <div className="flex gap-3 w-full">
-                        <Button onClick={onCopyClick} variant="secondary" className="flex-1 text-sm py-2">
+                        <Button onClick={onCopyClick} variant="secondary" className="flex-1 text-sm py-2" disabled={!isUrlValid}>
                             {copied ? <CheckCircle2 className="w-4 h-4 text-olive-600" /> : <Copy className="w-4 h-4" />}
                             {copied ? 'Copied' : 'Copy'}
                         </Button>
-                        <Button onClick={onDownloadClick} variant="secondary" className="flex-1 text-sm py-2">
+                        <Button onClick={onDownloadClick} variant="secondary" className="flex-1 text-sm py-2" disabled={!isUrlValid}>
                             <Download className="w-4 h-4" />
                             Download
                         </Button>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQRState } from './hooks/useQRState';
 import { QROptionsForm } from './components/QROptionsForm';
 import { QRPreview } from './components/QRPreview';
-import { QrCode, Library, PlusCircle, Trash2 } from 'lucide-react';
+import { QrCode, Library, PlusCircle, Trash2, Heart } from 'lucide-react';
 import { Card } from './components/ui/Card';
 import { Button } from './components/ui/Button';
 import { cn } from './utils/cn';
@@ -20,7 +20,7 @@ function App() {
 
   const [activeTab, setActiveTab] = useState<'generator' | 'my-codes'>('generator');
 
-  const [generatedData, setGeneratedData] = useState<string>(state.data);
+  const [generatedData, setGeneratedData] = useState<string>(state.data || 'https://sramanqr.com');
 
   const handleGenerate = () => {
     setGeneratedData(state.data);
@@ -149,7 +149,9 @@ function App() {
 
       {/* Footer */}
       <footer className="hidden md:block py-8 text-center text-sm text-olive-600 mt-auto">
-        <p>Built with quiet elegance.</p>
+        <p className="flex items-center justify-center gap-1.5">
+          Made with <Heart className="w-4 h-4 text-red-500 fill-current" /> by Sraman Labs &copy; 2026. All rights reserved.
+        </p>
       </footer>
     </div>
   );

@@ -19,8 +19,8 @@ export interface QRState {
 }
 
 const DEFAULT_STATE: QRState = {
-    title: "Sraman's sneakyQR",
-    data: 'https://sneakyqr.com',
+    title: '',
+    data: '',
     size: 300,
     margin: 10,
     errorCorrectionLevel: 'Q',
@@ -33,30 +33,15 @@ const DEFAULT_STATE: QRState = {
 };
 
 export function useQRState() {
-    const [state, setState] = useState<QRState>(() => {
-        const saved = localStorage.getItem('qr-draft');
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch (e) { }
-        }
-        return DEFAULT_STATE;
-    });
+    const [state, setState] = useState<QRState>(DEFAULT_STATE);
 
     const [savedCodes, setSavedCodes] = useState<QRState[]>(() => {
-        const saved = localStorage.getItem('qr-saved-codes');
+        const saved = sessionStorage.getItem('qr-saved-codes');
         return saved ? JSON.parse(saved) : [];
     });
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            localStorage.setItem('qr-draft', JSON.stringify(state));
-        }, 500);
-        return () => clearTimeout(timeout);
-    }, [state]);
-
-    useEffect(() => {
-        localStorage.setItem('qr-saved-codes', JSON.stringify(savedCodes));
+        sessionStorage.setItem('qr-saved-codes', JSON.stringify(savedCodes));
     }, [savedCodes]);
 
     const updateState = useCallback((updates: Partial<QRState>) => {

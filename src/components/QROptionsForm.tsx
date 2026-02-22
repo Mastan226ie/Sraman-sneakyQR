@@ -30,7 +30,7 @@ export const QROptionsForm: React.FC<QROptionsFormProps> = ({ state, updateState
                             id="title"
                             value={state.title || ''}
                             onChange={(e) => updateState({ title: e.target.value })}
-                            placeholder="My Awesome QR"
+                            placeholder="Sraman SneakyQR"
                         />
                     </div>
                     <div className="space-y-2">
@@ -39,8 +39,11 @@ export const QROptionsForm: React.FC<QROptionsFormProps> = ({ state, updateState
                             id="url"
                             value={state.data}
                             onChange={(e) => updateState({ data: e.target.value })}
-                            placeholder="https://example.com"
+                            placeholder="https://sramanqr.com" 
                         />
+                        {state.data.length > 0 && !Boolean(URL.canParse ? URL.canParse(state.data) : (() => { try { new URL(state.data); return true; } catch { return false; } })()) && (
+                            <p className="text-red-500 text-xs font-medium">Please enter a valid URL (e.g., https://example.com)</p>
+                        )}
                     </div>
                 </div>
             </Card>
