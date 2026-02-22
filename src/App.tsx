@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQRState } from './hooks/useQRState';
 import { QROptionsForm } from './components/QROptionsForm';
 import { QRPreview } from './components/QRPreview';
@@ -19,15 +19,38 @@ function App() {
   } = useQRState();
 
   const [activeTab, setActiveTab] = useState<'generator' | 'my-codes'>('generator');
-
   const [generatedData, setGeneratedData] = useState<string>(state.data || 'https://sramanqr.com');
+  const [isAppLoading, setIsAppLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsAppLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleGenerate = () => {
     setGeneratedData(state.data);
   };
 
+  if (isAppLoading) {
+    return (
+      <div className="min-h-screen bg-beige-100 flex flex-col items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-6 animate-pulse-slow">
+          <div className="w-20 h-20 rounded-2xl bg-olive-900 text-beige-50 flex items-center justify-center shadow-lg">
+            <QrCode className="w-10 h-10" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-olive-900">
+            SneakyQR
+          </h1>
+          <p className="text-olive-600 font-medium">Loading elegant experience...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-beige-100/50 flex flex-col font-sans selection:bg-olive-200 selection:text-olive-900 pb-20 md:pb-0">
+    <div className="min-h-screen bg-beige-100/50 flex flex-col font-sans selection:bg-olive-200 selection:text-olive-900 pb-24 md:pb-0">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-beige-50/80 backdrop-blur-md border-b border-beige-200/50 hidden md:block">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -57,14 +80,22 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 flex flex-col relative items-center justify-center min-h-[calc(100vh-160px)]">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-12 flex flex-col relative items-center justify-center min-h-[calc(100vh-180px)] md:min-h-[calc(100vh-160px)]">
         {activeTab === 'generator' ? (
           <div className="flex flex-col lg:flex-row items-start justify-center gap-8 lg:gap-20 w-full animate-fade-in max-w-5xl">
             <div className="flex-1 w-full max-w-xl shrink-0">
+              {/* Desktop Title */}
               <div className="mb-6 hidden md:block">
                 <h2 className="text-3xl font-bold text-olive-900 tracking-tight mb-2">Create your QR Code</h2>
                 <p className="text-olive-600 text-sm">Design elegant, scannable codes with a quiet luxury aesthetic.</p>
               </div>
+
+              {/* Mobile Title */}
+              <div className="mb-6 md:hidden text-center">
+                <h2 className="text-2xl font-bold text-olive-900 tracking-tight mb-1">SneakyQR</h2>
+                <p className="text-olive-600 text-sm font-medium">Customize the QR</p>
+              </div>
+
               <QROptionsForm
                 state={state}
                 updateState={updateState}
@@ -89,7 +120,7 @@ function App() {
             </aside>
           </div>
         ) : (
-          <div className="w-full max-w-3xl mx-auto animate-fade-in">
+          <div className="w-full max-w-3xl mx-auto animate-fade-in my-8 md:my-0">
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-olive-900 tracking-tight mb-2">My Saved Codes</h2>
               <p className="text-olive-600 text-sm">Manage your elegant QR code designs.</p>
@@ -148,9 +179,9 @@ function App() {
       </nav>
 
       {/* Footer */}
-      <footer className="hidden md:block py-8 text-center text-sm text-olive-600 mt-auto">
-        <p className="flex items-center justify-center gap-1.5">
-          Made with <Heart className="w-4 h-4 text-red-500 fill-current" /> by Sraman Labs &copy; 2026. All rights reserved.
+      <footer className="py-8 pb-32 md:pb-8 text-center text-xs md:text-sm text-olive-600 mt-auto">
+        <p className="flex items-center justify-center gap-1.5 px-4">
+          Made with <Heart className="w-3 h-3 md:w-4 md:h-4 text-red-500 fill-current shrink-0" /> by Sraman Labs &copy; 2026. All rights reserved.
         </p>
       </footer>
     </div>
